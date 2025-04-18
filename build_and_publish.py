@@ -2,8 +2,8 @@ import argparse
 
 from datasets import Dataset, DatasetDict
 
-from parsing import parse_incr
-from train_test_split import train_test_split
+from src.parsing import parse_incr
+from src.train_test_split import train_test_split
 
 
 def main():
