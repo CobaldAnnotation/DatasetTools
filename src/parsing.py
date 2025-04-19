@@ -63,8 +63,10 @@ def parse_feats(field: str) -> str | None:
     if field in ["", "_"]:
         return None
 
-    token_feats = parse_joint_field(field, inner_sep='=', outer_sep='|')
-    return json.dumps(token_feats)
+    # validate feats are parsable
+    parse_joint_field(field, inner_sep='=', outer_sep='|')
+    
+    return field
 
 
 def parse_head(field: str) -> int | None:
