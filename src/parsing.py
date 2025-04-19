@@ -134,9 +134,10 @@ def validate_range_token(token: Token):
 def validate_regular_token(token: Token):
     if token['head'] == token['id']:
         raise ValueError(f"Self-loop detected in head.")
-    for head in json.loads(token['deps']):
-        if head == token['id']:
-            raise ValueError(f"Self-loop detected in deps. head: {head}, id: {token['id']}")
+    if token['deps'] is not None:
+        for head in json.loads(token['deps']):
+            if head == token['id']:
+                raise ValueError(f"Self-loop detected in deps. head: {head}, id: {token['id']}")
 
 def validate_token(token: Token):
     idtag = token['id']
