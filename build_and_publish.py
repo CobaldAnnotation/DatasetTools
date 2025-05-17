@@ -2,46 +2,65 @@ import argparse
 
 from datasets import Dataset, DatasetDict
 
-from src.parsing import parse_incr
-from src.train_test_split import train_test_split
+from src.parsing import parse_incr, OPTIONAL_TAGS
 
 
 def main():
-    """Main function to load and process dataset."""
-    
     parser = argparse.ArgumentParser(description="Load and process a CONLLU file")
 
-    parser.add_argument("data_path", type=str, help="path to the conllu file")
-    parser.add_argument("repo_id", type=str,
-                        help="huggingface repo to push built dataset to")
-    parser.add_argument("config_name", type=str,
-                        help='dataset configuration name, e.g. "en"')
-    parser.add_argument("--train_fraction", type=float, default=0.8,
-                        help="relative size of train set")
+    parser.add_argument(
+        "--train_data_path",
+        type=str,
+        help="path to the train conllu file"
+    )
+    parser.add_argument(
+        "--validation_data_path",
+        type=str,
+        help="path to the optional validation conllu file"
+    )
+    parser.add_argument(
+        "--test_data_path",
+        type=str,
+        help="path to the optional test conllu file"
+    )
+    parser.add_argument(
+        "repo_id",
+        type=str,
+        help="huggingface repo to push built dataset to"
+    )
+    parser.add_argument(
+        "config_name",
+        type=str,
+        help='dataset configuration name within the repo, e.g. "en"'
+    )
+    parser.add_argument(
+        "--tags",
+        nargs="+",
+        type=str,
+        default=OPTIONAL_TAGS,
+        choices=OPTIONAL_TAGS,
+        help=(
+            "Tags to include in dataset, e.g. [heads, deprels, deps]."
+            "By default, all CoBaLD tags are used."
+        )
+    )
+
     args = parser.parse_args()
 
-    sentences = list(parse_incr(args.data_path))
-    train_sentences, validation_sentences = train_test_split(
-        sentences,
-        train_fraction=args.train_fraction,
-        tagsets_names=[
-            'upos',
-            'xpos',
-            'feats',
-            'deprels',
-            'deps',
-            'miscs',
-            'deepslots',
-            'semclasses'
-        ]
-    )
+    dataset_dict = DatasetDict()
+
+    if args.train_data_path:
+        train_sentences = parse_incr(args.train_data_path, args.tags)
+        dataset_dict['train'] = Dataset.from_generator(lambda: train_sentences)
+
+    if args.validation_data_path:
+        validation_sentences = parse_incr(args.validation_data_path, args.tags)
+        dataset_dict['validation'] = Dataset.from_generator(lambda: validation_sentences)
+
+    if args.test_data_path:
+        test_sentences = parse_incr(args.test_data_path, args.tags)
+        dataset_dict['test'] = Dataset.from_generator(lambda: test_sentences)
     
-    train_dataset = Dataset.from_list(train_sentences)
-    validation_dataset = Dataset.from_list(validation_sentences)
-    dataset_dict = DatasetDict({
-        'train': train_dataset,
-        'validation': validation_dataset
-    })
     dataset_dict.push_to_hub(args.repo_id, args.config_name)
 
 
