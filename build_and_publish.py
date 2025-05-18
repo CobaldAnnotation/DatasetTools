@@ -66,7 +66,7 @@ def main():
         )
 
     # Add custom filtering here if needed.
-    dataset_dict.filter(lambda x: 3 <= len(x["id"]))
+    dataset_dict = dataset_dict.filter(lambda x: 3 <= len(x["id"]))
     
     # Push dataset to hub.
     dataset_dict.push_to_hub(args.repo_id, args.config_name)
