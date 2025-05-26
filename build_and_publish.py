@@ -2,7 +2,7 @@ import argparse
 
 from datasets import Dataset, DatasetDict
 
-from parsing import parse_incr, OPTIONAL_TAGS
+from src.parsing import parse_incr, OPTIONAL_TAGS
 
 
 def main():
