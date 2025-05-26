@@ -167,7 +167,7 @@ def validate_token(token: Token):
         raise ValueError(f"Incorrect token id: {token[ID]}.")
 
 
-def parse_token(line: str, tags_to_parse: list[str]) -> Token:
+def parse_token(line: str, tags_to_parse: list[str], validate: bool) -> Token:
     try:
         fields = [field.strip() for field in line.split("\t")]
         if len(fields) < len(tags_to_parse):
@@ -201,7 +201,8 @@ def parse_token(line: str, tags_to_parse: list[str]) -> Token:
         if SEMCLASS in tags_to_parse:
             token[SEMCLASS] = parse_nullable(fields[11])
 
-        validate_token(token)
+        if validate:
+            validate_token(token)
 
     except Exception as e:
         raise ValueError(f"Validation failed on token {fields[0]}: {e}")
@@ -268,15 +269,17 @@ def validate_sentence(sentence: Sentence):
 def parse_sentence(
     token_lines: list[str],
     metadata: dict,
-    tags_to_parse: list[str]
+    tags_to_parse: list[str],
+    validate: bool
 ) -> Sentence:
     try:
         sentence = {tag: [] for tag in tags_to_parse}
         for token_line in token_lines:
-            token = parse_token(token_line, tags_to_parse)
+            token = parse_token(token_line, tags_to_parse, validate)
             for tag, value in token.items():
                 sentence[tag].append(value)
-        validate_sentence(sentence)
+        if validate:
+            validate_sentence(sentence)
 
     except Exception as e:
         raise ValueError(f"Validation failed on sentence {metadata.get('sent_id', None)}: {e}")
@@ -284,7 +287,7 @@ def parse_sentence(
     return sentence | metadata
 
 
-def parse_incr(filepath: str, optional_tags_to_parse: list[str]):
+def parse_incr(filepath: str, optional_tags_to_parse: list[str], validate: bool):
     """
     Generator that parses a CoNLL-U Plus file in CoBaLD format and yields one sentence at a time.
     
@@ -317,7 +320,7 @@ def parse_incr(filepath: str, optional_tags_to_parse: list[str]):
             if not line:
                 # End of a sentence block.
                 if token_lines:
-                    yield parse_sentence(token_lines, metadata, tags_to_parse)
+                    yield parse_sentence(token_lines, metadata, tags_to_parse, validate)
                     metadata = {}
                     token_lines = []
                 continue
@@ -336,4 +339,4 @@ def parse_incr(filepath: str, optional_tags_to_parse: list[str]):
 
     # Yield any remaining sentence at the end of the file.
     if token_lines:
-        yield parse_sentence(token_lines, metadata, tags_to_parse)
+        yield parse_sentence(token_lines, metadata, tags_to_parse, validate)
