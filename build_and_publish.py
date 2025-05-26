@@ -45,6 +45,12 @@ def main():
             "By default, all CoBaLD tags are used."
         )
     )
+    parser.add_argument(
+        "--filter_short_sentences",
+        type=int,
+        default=3,
+        help="Remove sentences of a specified length and shorter"
+    )
 
     args = parser.parse_args()
 
@@ -52,21 +58,23 @@ def main():
 
     if args.train_data_path:
         dataset_dict['train'] = Dataset.from_generator(
-            lambda: parse_incr(args.train_data_path, args.tags)
+            lambda: parse_incr(args.train_data_path, args.tags, validate=True)
         )
 
     if args.validation_data_path:
         dataset_dict['validation'] = Dataset.from_generator(
-            lambda: parse_incr(args.validation_data_path, args.tags)
+            lambda: parse_incr(args.validation_data_path, args.tags, validate=True)
         )
 
     if args.test_data_path:
         dataset_dict['test'] = Dataset.from_generator(
-            lambda: parse_incr(args.test_data_path, args.tags)
+            lambda: parse_incr(args.test_data_path, args.tags, validate=True)
         )
 
     # Add custom filtering here if needed.
-    dataset_dict = dataset_dict.filter(lambda x: 3 <= len(x["id"]))
+    dataset_dict = dataset_dict.filter(
+        lambda x: args.filter_short_sentences <= len(x["id"])
+    )
     
     # Push dataset to hub.
     dataset_dict.push_to_hub(args.repo_id, args.config_name)
