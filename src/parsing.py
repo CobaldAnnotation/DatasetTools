@@ -195,11 +195,11 @@ def parse_token(line: str, tags_to_parse: list[str], validate: bool) -> Token:
         if DEPS in tags_to_parse:
             token[DEPS] = parse_deps(fields[8])
         if MISC in tags_to_parse:
-            token[MISC] = parse_nullable(fields[9])
+            token[MISC] = fields[9] if fields[9] != "" else None
         if DEEPSLOT in tags_to_parse:
-            token[DEEPSLOT] = parse_nullable(fields[10])
+            token[DEEPSLOT] = fields[10] if fields[10] != "" else None
         if SEMCLASS in tags_to_parse:
-            token[SEMCLASS] = parse_nullable(fields[11])
+            token[SEMCLASS] = fields[11] if fields[11] != "" else None
 
         if validate:
             validate_token(token)
