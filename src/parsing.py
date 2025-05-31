@@ -141,11 +141,11 @@ def validate_range_token(token: Token):
         raise ValueError(f"Range token head must be _, but found {token[HEAD]}.")
     if DEPREL in token and token[DEPREL] is not None:
         raise ValueError(f"Range token deprel must be _, but found {token[DEPREL]}.")
-    if MISC in token and token[MISC] is not None:
+    if MISC in token and token[MISC] not in ['_', None]:
         raise ValueError(f"Range token misc must be _, but found {token[MISC]}.")
-    if DEEPSLOT in token and token[DEEPSLOT] is not None:
+    if DEEPSLOT in token and token[DEEPSLOT] not in ['_', None]:
         raise ValueError(f"Range token deepslot must be _, but found {token[DEEPSLOT]}.")
-    if SEMCLASS in token and token[SEMCLASS] is not None:
+    if SEMCLASS in token and token[SEMCLASS] not in ['_', None]:
         raise ValueError(f"Range token semclass must be _, but found {token[SEMCLASS]}.")
 
 def validate_regular_token(token: Token):
