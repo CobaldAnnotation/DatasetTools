@@ -46,7 +46,7 @@ def main():
         )
     )
     parser.add_argument(
-        "--filter_short_sentences",
+        "--min_sentence_length",
         type=int,
         default=3,
         help="Remove sentences of a specified length and shorter"
@@ -73,7 +73,7 @@ def main():
 
     # Add custom filtering here if needed.
     dataset_dict = dataset_dict.filter(
-        lambda x: args.filter_short_sentences <= len(x["id"])
+        lambda x: args.min_sentence_length <= len(x["id"])
     )
     
     # Push dataset to hub.
